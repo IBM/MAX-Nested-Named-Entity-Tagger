@@ -1,0 +1,5 @@
+tensorflow==1.15.2
+fastText
+git+https://github.com/danielfrg/word2vec
+flair
+allennlp==0.9. # ELMO
