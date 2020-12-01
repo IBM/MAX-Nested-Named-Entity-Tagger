@@ -24,7 +24,7 @@ SWAGGER_UI_DOC_EXPANSION = 'none'
 # API metadata
 API_TITLE = 'MAX Nested Named Entity Tagger'
 API_DESC = 'Locate and tag nested named entities in text'
-API_VERSION = '0.1'
+API_VERSION = '1.0.0'
 
 # default model
 MODEL_NAME = 'saved_model_nested_ner'
