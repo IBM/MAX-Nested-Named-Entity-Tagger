@@ -13,33 +13,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+from .morpho_dataset_new import MorphoDataset
+from .embedding import flair_embeddings, bert_embeddings, elmo_embeddings
+from maxfw.model import MAXModelWrapper
+from config import DEFAULT_MODEL_PATH, MODEL_META_DATA as model_meta
 import sys
 import os
+import logging
+import json
+import time
+import fasttext
+import tensorflow as tf
+import word2vec
+import pickle
+
 file_dir = os.path.dirname(__file__)
 sys.path.append(file_dir)
 
-from .morpho_dataset_new import MorphoDataset
-
-from .embedding import flair_embeddings, bert_embeddings, elmo_embeddings
-
-from maxfw.model import MAXModelWrapper
-
-import logging
-from config import DEFAULT_MODEL_PATH, MODEL_META_DATA as model_meta
-
-import json
-
-
-import time
-import fasttext
-import numpy as np
-import tensorflow as tf
-import word2vec
-#from nltk.tokenize import word_tokenize
-#import nltk
-import pickle
-#nltk.download('punkt')
 logger = logging.getLogger()
+
 
 class Network:
     def __init__(self, threads, seed=42):
@@ -181,7 +174,8 @@ class Network:
                     hidden_layer_dropout, sequence_length=self.sentence_lens, dtype=tf.float32,
                     scope="RNN-{}".format(i))
                 hidden_layer = tf.concat([hidden_layer_fwd, hidden_layer_bwd], axis=2)
-                if i == 0: hidden_layer_dropout = 0
+                if i == 0:
+                    hidden_layer_dropout = 0
                 hidden_layer_dropout += tf.layers.dropout(hidden_layer, rate=args['dropout'], training=self.is_training)
 
             # Decoders
@@ -210,7 +204,7 @@ class Network:
                 tag_embeddings = tf.get_variable("tag_embeddings", shape=[num_tags, args['we_dim']], dtype=tf.float32)
 
                 # Embed the target_seqs using the target embeddings.
-                tags_embedded = tf.nn.embedding_lookup(tag_embeddings, self.tags)
+                # tags_embedded = tf.nn.embedding_lookup(tag_embeddings, self.tags)
 
                 decoder_rnn_cell = rnn_cell(args['rnn_cell_dim'])
 
@@ -246,14 +240,14 @@ class Network:
                         inputs = [tf.nn.embedding_lookup(tag_embeddings, tf.fill([self.batch_size], tag_bos)),
                                   hidden_layer_dropout[:, 0]]
                         inputs = tf.concat(inputs, axis=1)
-                        if args['decoding']  == "seq2seq":
+                        if args['decoding'] == "seq2seq":
                             predicted_eows = tf.zeros([self.batch_size], dtype=tf.int32)
                             inputs = (inputs, predicted_eows)
                         finished = sentence_lens <= 0
                         return finished, inputs, states
 
                     def step(self, time, inputs, states, name=None):
-                        if args['decoding']  == "seq2seq":
+                        if args['decoding'] == "seq2seq":
                             inputs, predicted_eows = inputs
                         outputs, states = decoder_rnn_cell(inputs, states)
                         outputs = decoder_layer(outputs)
@@ -340,7 +334,8 @@ class Network:
 
             # Saver
             self.saver = tf.train.Saver(max_to_keep=1)
-            if predict_only: return
+            if predict_only:
+                return
 
             # Training
             global_step = tf.train.create_global_step()
@@ -377,8 +372,6 @@ class Network:
             self.session.run(tf.global_variables_initializer())
             with summary_writer.as_default():
                 tf.contrib.summary.initialize(session=self.session, graph=self.session.graph)
-
-
 
     def predict(self, dataset_name, dataset, args, train,  prediction_file, evaluating=False):
         res_tags = []
@@ -440,12 +433,13 @@ class Network:
                     res_tags.append("|".join(labels))
                     res_forms.append(forms[s][i])
                 else:
-                    print("{}\t_\t_\t{}".format(forms[s][i], dataset.factors[dataset.TAGS].words[tags[s][i]]), file
-                          =prediction_file)
+                    print("{}\t_\t_\t{}".format(forms[s][i], dataset.factors[dataset.TAGS].words[tags[s][i]]),
+                          file=prediction_file)
                     res_tags.append(dataset.factors[dataset.TAGS].words[tags[s][i]])
                     res_forms.append(forms[s][i])
             print("", file=prediction_file)
         return res_forms, res_tags
+
 
 class ModelWrapper(MAXModelWrapper):
 
@@ -456,33 +450,26 @@ class ModelWrapper(MAXModelWrapper):
 
         # Load the graph
         # Load saved options from the model
-        save_path = DEFAULT_MODEL_PATH+\
-                    "/logs/tagger_new_new.py-2020-07-29_152313-bs=8,be=1,c=GENIA,d=seq2seq,ee=1,e=10:1e-3,8:1e-4,fm=None,fe=1,fwm=1,i=None,id=None,lwm=0,n=seq2seq+ELMo+BERT+Flair,p=None,rc=LSTM,rl=1"
+        save_path = DEFAULT_MODEL_PATH +\
+            "/logs/tagger_new_new.py-2020-07-29_152313-bs=8,be=1,c=GENIA,d=seq2seq,ee=1,e=10:1e-3,8:1e-4,fm=None,fe=1,fwm=1,i=None,id=None,lwm=0,n=seq2seq+ELMo+BERT+Flair,p=None,rc=LSTM,rl=1" # noqa
         with open("{}/options.json".format(save_path), mode="r") as options_file:
             self.args = json.load(options_file)
-
-
-        # Postprocess args
-        '''args.epochs = [(int(epochs), float(lr)) for epochs, lr in
-                       (epochs_lr.split(":") for epochs_lr in args.epochs.split(","))]'''
-
         self.seq2seq = self.args['decoding'] == "seq2seq"
 
         # Load from file
-        with open("{}/{}/train.pkl".format(DEFAULT_MODEL_PATH,self.args['logdir']), 'rb') as file:
+        with open("{}/{}/train.pkl".format(DEFAULT_MODEL_PATH, self.args['logdir']), 'rb') as file:
             self.train = pickle.load(file)
-
 
         # Set up instance variables and required inputs for inference
             # Load pretrained form embeddings
             if self.args['form_wes_model']:
-                self.args['form_wes_model'] = word2vec.load('{}/{}'.format(DEFAULT_MODEL_PATH,self.args['form_wes_model']))
+                self.args['form_wes_model'] = word2vec.load('{}/{}'.format(DEFAULT_MODEL_PATH, self.args['form_wes_model']))
             if self.args['lemma_wes_model']:
-                self.args['lemma_wes_model'] = word2vec.load('{}/{}'.format(DEFAULT_MODEL_PATH,self.args['lemma_wes_model']))
+                self.args['lemma_wes_model'] = word2vec.load('{}/{}'.format(DEFAULT_MODEL_PATH, self.args['lemma_wes_model']))
 
             # Load fasttext subwords embeddings
             if self.args['fasttext_model']:
-                self.args['fasttext_model'] = fasttext.load_model('{}/{}'.formt(DEFAULT_MODEL_PATH,self.args['fasttext_model']))
+                self.args['fasttext_model'] = fasttext.load_model('{}/{}'.formt(DEFAULT_MODEL_PATH, self.args['fasttext_model'])) # noqa
 
             # Character-level embeddings
             self.args['including_charseqs'] = (self.args['cle_dim'] > 0)
@@ -491,33 +478,32 @@ class ModelWrapper(MAXModelWrapper):
             self.network = Network(threads=self.args['threads'])
 
             self.network.construct(self.args,
-                              num_forms=len(self.train.factors[self.train.FORMS].words),
-                              num_form_chars=len(self.train.factors[self.train.FORMS].alphabet),
-                              num_lemmas=len(self.train.factors[self.train.LEMMAS].words),
-                              num_lemma_chars=len(self.train.factors[self.train.LEMMAS].alphabet),
-                              num_pos=len(self.train.factors[self.train.POS].words),
-                              pretrained_form_we_dim=self.args['form_wes_model'].vectors.shape[1] if self.args['form_wes_model'] else 0,
-                              pretrained_lemma_we_dim=self.args['lemma_wes_model'].vectors.shape[
-                                  1] if self.args['lemma_wes_model'] else 0,
-                              pretrained_fasttext_dim=self.args['fasttext_model'].get_dimension() if self.args['fasttext_model'] else 0,
-                              num_tags=len(self.train.factors[self.train.TAGS].words),
-                              tag_bos=self.train.factors[self.train.TAGS].words_map["<bos>"],
-                              tag_eow=self.train.factors[self.train.TAGS].words_map["<eow>"],
-                              pretrained_bert_dim=self.train.bert_embeddings_dim(),
-                              pretrained_flair_dim=self.train.flair_embeddings_dim(),
-                              pretrained_elmo_dim=self.train.elmo_embeddings_dim(),
-                              predict_only=self.args['predict'])
-        self.network.saver.restore(self.network.session, "{}/{}/model".format(DEFAULT_MODEL_PATH,self.args['logdir'].rstrip("/")))
+                                   num_forms=len(self.train.factors[self.train.FORMS].words),
+                                   num_form_chars=len(self.train.factors[self.train.FORMS].alphabet),
+                                   num_lemmas=len(self.train.factors[self.train.LEMMAS].words),
+                                   num_lemma_chars=len(self.train.factors[self.train.LEMMAS].alphabet),
+                                   num_pos=len(self.train.factors[self.train.POS].words),
+                                   pretrained_form_we_dim=self.args['form_wes_model'].vectors.shape[1] if self.args['form_wes_model'] else 0, # noqa
+                                   pretrained_lemma_we_dim=self.args['lemma_wes_model'].vectors.shape[
+                                       1] if self.args['lemma_wes_model'] else 0,
+                                   pretrained_fasttext_dim=self.args['fasttext_model'].get_dimension() if self.args['fasttext_model'] else 0, # noqa
+                                   num_tags=len(self.train.factors[self.train.TAGS].words),
+                                   tag_bos=self.train.factors[self.train.TAGS].words_map["<bos>"],
+                                   tag_eow=self.train.factors[self.train.TAGS].words_map["<eow>"],
+                                   pretrained_bert_dim=self.train.bert_embeddings_dim(),
+                                   pretrained_flair_dim=self.train.flair_embeddings_dim(),
+                                   pretrained_elmo_dim=self.train.elmo_embeddings_dim(),
+                                   predict_only=self.args['predict'])
+        self.network.saver.restore(self.network.session, "{}/{}/model".format(DEFAULT_MODEL_PATH, self.args['logdir'].rstrip("/"))) # noqa
         logger.info('Loaded model')
 
     def _pre_process(self, inp):
         # considering the format of the CONLL files (sentences/articles are separated by one empty line!)
         contents = inp.split('\n\n')
-        #tokenized_contents = [word_tokenize(content) for content in contents]
         tokenized_contents = [content.split(' ') for content in contents]
-        # print(tokenized_contents)
 
-        if not os.path.exists("embeddings"): os.mkdir("embeddings")  # TF 1.6 will do this by itself
+        if not os.path.exists("embeddings"):
+            os.mkdir("embeddings")  # TF 1.6 will do this by itself
         embedding_start_time = time.time()
         # Recreating the sentences to get the contextualized embedding as opposed to isolated word embeddings!
         bert_embeddings(contents, tokenized_contents, 'embeddings/bert_large_embeddings.txt')
@@ -526,22 +512,21 @@ class ModelWrapper(MAXModelWrapper):
         embedding_end_time = time.time()
         print("Finished Embedding in {} Seconds!".format(embedding_end_time - embedding_start_time))
         # Here we should add the pos tags and lematization later on!
-        #inference_input = [token + "\t-\t-\t" for content in contents for token in word_tokenize(content)]
         inference_input = [token + "\t-\t-\t" for content in contents for token in content.split(' ')]
         inference = MorphoDataset(input_sentence=inference_input, train=self.train, shuffle_batches=False,
-                                                     seq2seq=self.seq2seq,
-                                                     bert_embeddings_filename='embeddings/bert_large_embeddings.txt',
-                                                     flair_filename='embeddings/flair_embeddings.txt',
-                                                     elmo_filename='embeddings/elmo_embeddings.txt',
-                                                     inference_mode=True)
+                                  seq2seq=self.seq2seq,
+                                  bert_embeddings_filename='embeddings/bert_large_embeddings.txt',
+                                  flair_filename='embeddings/flair_embeddings.txt',
+                                  elmo_filename='embeddings/elmo_embeddings.txt',
+                                  inference_mode=True)
 
-        return inference # input sentence in MorphoDataset format
+        return inference  # input sentence in MorphoDataset format
 
     def _post_process(self, result):
         return result
 
     def _predict(self, x):
-        forms,tags = self.network.predict("inference", x, self.args, self.train,  sys.stdout, evaluating=False)
+        forms, tags = self.network.predict("inference", x, self.args, self.train,  sys.stdout, evaluating=False)
         return forms, tags
 
     def predict(self, x):
