@@ -37,7 +37,7 @@ import tensorflow as tf
 import word2vec
 #from nltk.tokenize import word_tokenize
 #import nltk
-import pickle
+import pickle  # nosec
 #nltk.download('punkt')
 logger = logging.getLogger()
 
@@ -470,7 +470,7 @@ class ModelWrapper(MAXModelWrapper):
 
         # Load from file
         with open("{}/{}/train.pkl".format(DEFAULT_MODEL_PATH,self.args['logdir']), 'rb') as file:
-            self.train = pickle.load(file)
+            self.train = pickle.load(file) # nosec -- loading a known safe file
 
 
         # Set up instance variables and required inputs for inference
