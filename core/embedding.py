@@ -35,7 +35,8 @@ def bert_embeddings(sentences, tokenized_contents, output_file=None):
         bert_embedding.embed(sentence)
 
         for j , (token,st) in enumerate(zip(sentence,sent_tokens)):
-            assert token.text == st
+            if token.text != st
+                raise ValueError("Invalid token text")
             if output_file:
                 f.write(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
             else:
@@ -99,7 +100,8 @@ def elmo_embeddings(sentences, tokenized_contents, output_file=None):
         # Getting the tokens from our own tokenized sentence!
         tokens: List[Token] = [Token(token) for token in sent_tokens]
 
-        assert len(tokens)==len(sent_tokens)
+        if len(tokens) != len(sent_tokens):
+            raise ValueError("token length does not match sent_tokens length")
 
         # Create new empty sentence
         sentence = Sentence()
