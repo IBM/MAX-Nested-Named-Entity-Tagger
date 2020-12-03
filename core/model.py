@@ -458,7 +458,7 @@ class ModelWrapper(MAXModelWrapper):
 
         # Load from file
         with open("{}/{}/train.pkl".format(DEFAULT_MODEL_PATH, self.args['logdir']), 'rb') as file:
-            self.train = pickle.load(file) # nosec -- loading a known safe file
+            self.train = pickle.load(file)  # nosec -- loading a known safe file
 
         # Set up instance variables and required inputs for inference
             # Load pretrained form embeddings

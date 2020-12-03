@@ -36,7 +36,7 @@ def bert_embeddings(sentences, tokenized_contents, output_file=None):
         bert_embedding.embed(sentence)
 
         for j, (token, st) in enumerate(zip(sentence, sent_tokens)):
-            if token.text != st
+            if token.text != st:
                 raise ValueError("Invalid token text")
             if output_file:
                 f.write(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
