@@ -47,22 +47,63 @@ def test_metadata():
 
 def test_response():
     model_endpoint = 'http://localhost:5000/model/predict'
-    text = 'John lives in Brussels and works for the EU'
+    text = 'The peri-kappa B site mediates human-immunodeficiency virus type 2 enhancer activation, in monocytes but not in T cells.' # noqa
     test_json = {
         "text": text
     }
-    expected_tags = ["B-PER", "O", "O", "B-GEO", "O", "O", "O", "O", "B-ORG"]
-    expected_terms = ["John", "lives", "in", "Brussels", "and", "works", "for", "the", "EU"]
-
+    expected_response = {
+                        "status": "ok",
+                        "predictions": {
+                            "entities": [
+                                    "O",
+                                    "B-G#DNA_domain_or_region",
+                                    "I-G#DNA_domain_or_region",
+                                    "L-G#DNA_domain_or_region",
+                                    "O",
+                                    "B-G#other_name|B-G#DNA_domain_or_region|B-G#virus",
+                                    "I-G#other_name|I-G#DNA_domain_or_region|I-G#virus",
+                                    "I-G#other_name|I-G#DNA_domain_or_region|I-G#virus",
+                                    "I-G#other_name|I-G#DNA_domain_or_region|I-G#virus",
+                                    "I-G#other_name|I-G#DNA_domain_or_region|L-G#virus",
+                                    "L-G#DNA_domain_or_region",
+                                    "U-G#other_name",
+                                    "O",
+                                    "U-G#cell_type",
+                                    "O",
+                                    "O",
+                                    "O",
+                                    "B-G#cell_type",
+                                    "L-G#cell_type",
+                                    "O"],
+                            "input_terms": [
+                                "The",
+                                "peri-kappa",
+                                "B",
+                                "site",
+                                "mediates",
+                                "human-",
+                                "immunodeficiency",
+                                "virus",
+                                "type",
+                                "2",
+                                "enhancer",
+                                "activation",
+                                "in",
+                                "monocytes",
+                                "but",
+                                "not",
+                                "in",
+                                "T",
+                                "cells",
+                                "."]
+                            }
+                        }
     r = requests.post(url=model_endpoint, json=test_json)
 
     assert r.status_code == 200
     response = r.json()
     assert response['status'] == 'ok'
-   #assert response['prediction']['terms'] == expected_terms   UNDO
-    #assert response['prediction']['tags'] == expected_tags UNDO
-
-
+    assert expected_response == response
 
 
 if __name__ == '__main__':

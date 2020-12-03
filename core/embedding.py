@@ -1,10 +1,11 @@
 import argparse
 
-######## Flair and ELMO and Bert Embedding ########
+# Flair and ELMO and Bert Embedding
 from flair.embeddings import FlairEmbeddings, ELMoEmbeddings, TransformerWordEmbeddings
 from flair.data import Sentence, Token
 from typing import List
 from pytorch_pretrained_bert import BertTokenizer
+
 
 def bert_embeddings(sentences, tokenized_contents, output_file=None):
     # Using bert_tokenizer for checking for sequence wordpeice tokens length > 512
@@ -15,13 +16,13 @@ def bert_embeddings(sentences, tokenized_contents, output_file=None):
     # init multilingual BERT
     bert_embedding = TransformerWordEmbeddings('bert-large-uncased')
     long_sent = False
-    for i, (sent, sent_tokens) in enumerate(zip(sentences,tokenized_contents)):
+    for i, (sent, sent_tokens) in enumerate(zip(sentences, tokenized_contents)):
         print("Encoding the {}th input sentence for BERT embedding!".format(i))
         # getting the length of bert tokenized sentence after wordpeice tokenization
         if len(bert_tokenizer.tokenize(sent[0])) >= 510:
             long_sent = True
-            truncated_tokens=sent_tokens[:len(sent_tokens)//2]
-            sent_tokens=sent_tokens[len(sent_tokens)//2:]
+            truncated_tokens = sent_tokens[:len(sent_tokens)//2]
+            sent_tokens = sent_tokens[len(sent_tokens)//2:]
 
         # Using our own tokens (our own tokenization)
         tokens: List[Token] = [Token(token) for token in sent_tokens]
@@ -34,7 +35,7 @@ def bert_embeddings(sentences, tokenized_contents, output_file=None):
 
         bert_embedding.embed(sentence)
 
-        for j , (token,st) in enumerate(zip(sentence,sent_tokens)):
+        for j, (token, st) in enumerate(zip(sentence, sent_tokens)):
             if token.text != st
                 raise ValueError("Invalid token text")
             if output_file:
@@ -53,24 +54,24 @@ def bert_embeddings(sentences, tokenized_contents, output_file=None):
             for token in truncated_sentence:
                 if output_file:
                     f.write(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
-                    #print(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
                 else:
                     print(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
             long_sent = False
 
         f.write('\n')
 
+
 def flair_embeddings(sentences, tokenized_contents, output_file=None):
     if output_file:
         f = open(output_file, 'w')
     # init embedding
     flair_embedding_forward = FlairEmbeddings('news-forward')
-    for i, (sent, sent_tokens) in enumerate(zip(sentences,tokenized_contents)):
+    for i, (sent, sent_tokens) in enumerate(zip(sentences, tokenized_contents)):
         print("Encoding the {}th input sentence for Flair embedding!".format(i))
         # Getting the tokens from our own tokenized sentence!
         tokens: List[Token] = [Token(token) for token in sent_tokens]
 
-        assert len(tokens)==len(sent_tokens)
+        assert len(tokens) == len(sent_tokens)
 
         # Create new empty sentence
         sentence = Sentence()
@@ -84,10 +85,10 @@ def flair_embeddings(sentences, tokenized_contents, output_file=None):
 
             if output_file:
                 f.write(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
-                #print(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
             else:
                 print(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
         f.write('\n')
+
 
 def elmo_embeddings(sentences, tokenized_contents, output_file=None):
     if output_file:
@@ -95,7 +96,7 @@ def elmo_embeddings(sentences, tokenized_contents, output_file=None):
     # init embedding
     # For English biomedical data you can use 'pubmed'
     embedding = ELMoEmbeddings('original')  # English	4096-hidden, 2 layers, 93.6M parameters
-    for i, (sent, sent_tokens) in enumerate(zip(sentences,tokenized_contents)):
+    for i, (sent, sent_tokens) in enumerate(zip(sentences, tokenized_contents)):
         print("Encoding the {}th input sentence for ELMO embedding!".format(i))
         # Getting the tokens from our own tokenized sentence!
         tokens: List[Token] = [Token(token) for token in sent_tokens]
@@ -115,10 +116,10 @@ def elmo_embeddings(sentences, tokenized_contents, output_file=None):
 
             if output_file:
                 f.write(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
-                #print(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
             else:
                 print(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
         f.write('\n')
+
 
 def elmo_embeddings_flair_lib_tokenization(sentences, output_file=None):
     if output_file:
@@ -137,10 +138,10 @@ def elmo_embeddings_flair_lib_tokenization(sentences, output_file=None):
             if output_file:
 
                 f.write(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
-                #print(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
             else:
                 print(token.text + " " + " ".join([str(num) for num in token.embedding.tolist()]) + '\n')
         f.write('\n')
+
 
 if __name__ == "__main__":
 
@@ -173,7 +174,7 @@ if __name__ == "__main__":
                 tokenized_sentence = []
 
             else:
-                token_per_line = line.split('\t')[0] # token in the conll
+                token_per_line = line.split('\t')[0]  # token in the conll
                 sentence += ' ' + token_per_line
                 tokenized_sentence.append(token_per_line)
             line = f.readline()
@@ -181,12 +182,7 @@ if __name__ == "__main__":
     else:
         contents = [args.input_sentence]
 
-    #print(contents)
-    #print('n_lines={}'.format(n_lines))
     assert len(contents) == len(tokenized_contents)
-    #flat_list = [item for sublist in tokenized_contents for item in sublist]
-    #print(len(flat_list))
-    #print('len(tokenized_contents)={}'.format(len(tokenized_contents)))
     if 'BERT' in args.contextual_embedding:
         if args.output_file:
 

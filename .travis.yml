@@ -10,6 +10,6 @@ install:
 before_script:
   - sleep 30
 script:
-  - flake8 . --max-line-length=127
+  - flake8 . --max-line-length=127 --exclude core/morpho_dataset_new.py
   - bandit -r .
-  # - pytest tests/test.py
+  - pytest tests/test.py
