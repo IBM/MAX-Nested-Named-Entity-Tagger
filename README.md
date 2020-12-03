@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/IBM/MAX-Nested-Named-Entity-Tagger.svg?branch=master)](https://travis-ci.com/IBM/MAX-Nested-Named-Entity-Tagger) [![Website Status](https://img.shields.io/website/http/max-nested-named-entity-tagger.max.us-south.containers.appdomain.cloud/swagger.json.svg?label=api+demo)](http://max-nested-named-entity-tagger.max.us-south.containers.appdomain.cloud/)
+[![Build Status](https://travis-ci.com/IBM/MAX-Nested-Named-Entity-Tagger.svg?branch=master)](https://travis-ci.com/IBM/MAX-Nested-Named-Entity-Tagger) [![Website Status](https://img.shields.io/website/http/max-nested-named-entity-tagger.codait-prod-41208c73af8fca213512856c7a09db52-0000.us-east.containers.appdomain.cloud/swagger.json.svg?label=api+demo)](http://max-nested-named-entity-tagger.codait-prod-41208c73af8fca213512856c7a09db52-0000.us-east.containers.appdomain.cloud)
 
 [<img src="docs/deploy-max-to-ibm-cloud-with-kubernetes-button.png" width="400px">](http://ibm.biz/max-to-ibm-cloud-tutorial)
 
@@ -10,7 +10,7 @@ The model consists of a seq2seq architecture with a bi-directional LSTM layer as
 Finally an LSTM decoder layer is applied to this combined vector representation for generating the named entity tags. The input to the model is a string and the output is a list of terms in the input text (after applying simple tokenization), together with a list of predicted entity tags for each term.
 
 The model architecture is based on the Jana Strakova's [Neural Architectures for Nested NER through Linearization](https://github.com/ufal/acl2019_nested_ner). The model files are hosted on
-[IBM Cloud Object Storage](https://s3.us-east.cloud-object-storage.appdomain.cloud/nested-ner-storage/saved_model_nested_ner.tar.gz).
+[IBM Cloud Object Storage](https://max-cdn.cdn.appdomain.cloud/max-nested-named-entity-tagger/1.0.0/saved_model_nested_ner.tar.gz).
 The code in this repository deploys the model as a web service in a Docker container. This repository was developed
 as part of the [IBM Developer Model Asset Exchange](https://developer.ibm.com/exchanges/models/) and the public API is powered by [IBM Cloud](https://ibm.biz/Bdz2XM).
 
