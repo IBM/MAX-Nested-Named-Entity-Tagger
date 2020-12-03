@@ -71,7 +71,8 @@ def flair_embeddings(sentences, tokenized_contents, output_file=None):
         # Getting the tokens from our own tokenized sentence!
         tokens: List[Token] = [Token(token) for token in sent_tokens]
 
-        assert len(tokens) == len(sent_tokens)
+        if len(tokens) != len(sent_tokens):
+            raise ValueError("tokens length does not match sent_tokens length")
 
         # Create new empty sentence
         sentence = Sentence()
@@ -182,7 +183,8 @@ if __name__ == "__main__":
     else:
         contents = [args.input_sentence]
 
-    assert len(contents) == len(tokenized_contents)
+    if len(contents) != len(tokenized_contents):
+        raise ValueError("contents length does not match tokenized_contents length")
     if 'BERT' in args.contextual_embedding:
         if args.output_file:
 
