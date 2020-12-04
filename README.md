@@ -112,7 +112,7 @@ All required model assets will be downloaded during the build process. _Note_ th
 To run the docker image, which automatically starts the model serving API, run:
 
 ```shell
-$ docker run -it -p 5000:5000 codait/max-nested-named-entity-tagger
+$ docker run -it -p 5000:5000 max-nested-named-entity-tagger
 ```
 
 ### 3. Use the Model
