@@ -44,6 +44,7 @@ def test_metadata():
     assert metadata['description'] == 'Named Entity Recognition model trained on Genia dataset'
     assert metadata['license'] == 'Mozilla Public 2.0'
 
+
 def test_response():
     model_endpoint = 'http://localhost:5000/model/predict'
     text = 'The peri-kappa B site mediates human-immunodeficiency virus type 2 enhancer activation, in monocytes but not in T cells.' # noqa
