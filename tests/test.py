@@ -39,11 +39,10 @@ def test_metadata():
     assert r.status_code == 200
 
     metadata = r.json()
-    assert metadata['id'] == 'ADD IN MODEL ID'
-    assert metadata['name'] == 'ADD MODEL NAME'
-    assert metadata['description'] == 'ADD MODEL DESCRIPTION'
-    assert metadata['license'] == 'ADD MODEL LICENSE'
-
+    assert metadata['id'] == 'max-nested-named-entity-tagger'
+    assert metadata['name'] == 'MAX Nested Named Entity Tagger'
+    assert metadata['description'] == 'Named Entity Recognition model trained on Genia dataset'
+    assert metadata['license'] == 'Mozilla Public 2.0'
 
 def test_response():
     model_endpoint = 'http://localhost:5000/model/predict'
