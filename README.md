@@ -4,7 +4,7 @@
 
 # IBM Developer Model Asset Exchange: Nested Named Entity Tagger
 
-This repository contains code to instantiate and deploy a nested named entity recognition model. This model annotates each word or term in a piece of text with a tag representing the entity type, taken from a list of 145  entity tags from the [GENIA Term corpus version 3.02](http://www.geniaproject.org/genia-corpus/term-corpus). A detailed list of all entites can be found [here](samples/entites.md)
+This repository contains code to instantiate and deploy a nested named entity recognition model. This model annotates each word or term in a piece of text with a tag representing the entity type, taken from a list of 145  entity tags from the [GENIA Term corpus version 3.02](http://www.geniaproject.org/genia-corpus/term-corpus). A detailed list of all entities can be found [here](samples/entities.md)
 
 The model consists of a seq2seq architecture with a bi-directional LSTM layer as an encoder applied to character-level embedding vectors, which are combined with pre-trained [word2vec](http://vectors.nlpl.eu/repository/20/4.zip) and pre-trained binary [FastText](https://fasttext.cc/docs/en/crawl-vectors.html) word vector embeddings; The contextualized embeddings (BERT, ELMo, Flair) have been generated using the [FlairNLP library](https://github.com/flairNLP). The per-token BERT contextualized word embeddings are created as an average of all token corresponding BERT subwords. Under the hoods Flair uses the [pretrained BERT Large Uncased](https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-24_H-1024_A-16.zipFinally) weights.
 Finally an LSTM decoder layer is applied to this combined vector representation for generating the named entity tags. The input to the model is a string and the output is a list of terms in the input text (after applying simple tokenization), together with a list of predicted entity tags for each term.
@@ -131,7 +131,7 @@ In conclusion, these data show that IL-10 induces c-fos  expression in human by 
 
 
 
-![INSERT SWAGGER UI SCREENSHOT HERE](docs/swagger-screenshot.png)
+![swagger screenshot](docs/swagger-screenshot.png)
 
 You can also test it on the command line, for example:
 
