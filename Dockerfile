@@ -14,13 +14,11 @@
 # limitations under the License.
 #
 
-FROM quay.io/codait/max-base:v1.3.2
+FROM quay.io/codait/max-base:v1.4.0
 
 # Fill in these with a link to the bucket containing the model and the model file name
 ARG model_bucket=https://max-cdn.cdn.appdomain.cloud/max-nested-named-entity-tagger/1.0.0
 ARG model_file=saved_model_nested_ner.tar.gz
-
-WORKDIR /workspace
 
 ARG use_pre_trained_model=true
 
@@ -30,12 +28,12 @@ RUN if [ "$use_pre_trained_model" = "true" ] ; then\
      tar -x -C assets/ -f assets/${model_file} -v && rm assets/${model_file} ; \
     fi
 
-COPY requirements.txt /workspace
-RUN apt-get update
-RUN apt-get install -y build-essential
+RUN sudo apt-get update && sudo apt-get install -y build-essential && sudo rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY . /workspace
+COPY . .
 
 RUN if [ "$use_pre_trained_model" = "true" ] ; then \
       # validate downloaded pre-trained model assets
